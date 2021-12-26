@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:todoapp/detail.dart';
 
 void main() {
   runApp(const MyApp());
@@ -39,6 +40,13 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
+  void _viewDetailPage(int num) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => DetailPage(num.toString())),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
 
@@ -46,24 +54,18 @@ class _MyHomePageState extends State<MyHomePage> {
       appBar: AppBar(
         title: Text(widget.title),
       ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text(
-              'You have pushed the button this many times:',
+      body: ListView(
+        children: <Widget>[
+          for (var i = 0; i < 50; i++) ...{
+            ListTile(
+              leading: Icon(Icons.task_alt),
+              title: Text('Task${i}'),
+              onTap: () {
+                  _viewDetailPage(i);
+              },
             ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headline4,
-            ),
-          ],
-        ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
+          }
+        ],
       ),
     );
   }
