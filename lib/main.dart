@@ -1,7 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:todoapp/add_form.dart';
 import 'package:todoapp/detail.dart';
+import 'package:todoapp/todo_db.dart';
+import 'package:todoapp/add_form.dart';
+import 'dart:async';
 
-void main() {
+List<Todo> todoLists = [];
+
+void main() async {
+  todoLists = await getAllTodo();
+  print(todoLists);
   runApp(const MyApp());
 }
 
@@ -16,7 +24,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      home: const MyHomePage(title: 'TODO APP'),
     );
   }
 }
@@ -31,41 +39,81 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
 
-  void _incrementCounter() {
-    setState(() {
-
-      _counter++;
-    });
+  void _setTodoInfo() async {
+    todoLists = await getAllTodo();
   }
 
-  void _viewDetailPage(int num) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => DetailPage(num.toString())),
+  void _deleteTodo(int? id) async {
+    await deleteTodo(id);
+    _getAllTodo();
+  }
+
+  void _getAllTodo() {
+    print('getAllTodo');
+    setState (
+        () {
+          _setTodoInfo();
+        }
     );
   }
 
   @override
-  Widget build(BuildContext context) {
+  void initState() {
+    super.initState();
+  }
 
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
       ),
-      body: ListView(
-        children: <Widget>[
-          for (var i = 0; i < 50; i++) ...{
-            ListTile(
-              leading: Icon(Icons.task_alt),
-              title: Text('Task${i}'),
+
+      body: ListView.builder(
+        itemCount: todoLists.length,
+        itemBuilder: (context, index) {
+          return ListTile(
+            leading: const Icon(Icons.task_alt),
+            title: Text('${todoLists[index].title}'),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => DetailPage(todoLists[index].id)),
+              ).then( (value) {
+                _getAllTodo();
+              });
+            },
+            trailing: InkWell(
               onTap: () {
-                  _viewDetailPage(i);
+                _deleteTodo(todoLists[index].id);
               },
+              child: Container(
+                padding: const EdgeInsets.all(9.0),
+                child: const Icon(Icons.delete,
+                  color: Colors.red,
+                ),
+              ),
             ),
-          }
-        ],
+          );
+        },
+      ),
+
+      floatingActionButton: FloatingActionButton(
+        onPressed: () async {
+          //
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => AddForm()),
+          ).then(
+              (value) {
+                _getAllTodo();
+              }
+          );
+        },
+        backgroundColor: Colors.blue,
+        child: const Icon(Icons.add),
       ),
     );
   }
